@@ -1,16 +1,20 @@
 import { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler } from 'discord-akairo';
 import { ColorResolvable, Message } from 'discord.js';
 import { join } from 'path';
+import Stripe from 'stripe';
 import { Logger } from 'winston';
 import SettingsProvider from '../../database';
+import { intents } from '../util/constants';
 import { logger } from '../util/logger';
 
 declare module 'discord-akairo' {
 	interface AkairoClient {
 		logger: Logger;
 		commandHandler: CommandHandler;
+		listenerHandler: ListenerHandler;
 		config: ClientOptions;
 		settings: SettingsProvider;
+		stripe: Stripe;
 	}
 }
 
@@ -29,16 +33,23 @@ export default class Client extends AkairoClient {
 			messageSweepInterval: 900,
 			ownerID: config.owners,
 			shards: 'auto',
+			ws: {
+				intents,
+			},
 		});
 
 		this.config = config;
 	}
 
-	public config: ClientOptions;
+	public readonly config: ClientOptions;
 
-	public logger: Logger = logger;
+	public readonly logger: Logger = logger;
 
-	public commandHandler: CommandHandler = new CommandHandler(this, {
+	public readonly stripe: Stripe = new Stripe(process.env.STRIPE_API_KEY!, {
+		apiVersion: '2020-03-02',
+	});
+
+	public readonly commandHandler: CommandHandler = new CommandHandler(this, {
 		directory: join(__dirname, '..', 'commands'),
 		prefix: (msg: Message): string => {
 			if (msg.guild) {
@@ -69,15 +80,15 @@ export default class Client extends AkairoClient {
 		},
 	});
 
-	public inhibitorHandler: InhibitorHandler = new InhibitorHandler(this, {
+	public readonly inhibitorHandler: InhibitorHandler = new InhibitorHandler(this, {
 		directory: join(__dirname, '..', 'inhibitors'),
 	});
 
-	public listenerHandler: ListenerHandler = new ListenerHandler(this, {
+	public readonly listenerHandler: ListenerHandler = new ListenerHandler(this, {
 		directory: join(__dirname, '..', 'listeners'),
 	});
 
-	public settings: SettingsProvider = new SettingsProvider(this);
+	public readonly settings: SettingsProvider = new SettingsProvider(this);
 
 	private async load(): Promise<this> {
 		await this.settings.init();

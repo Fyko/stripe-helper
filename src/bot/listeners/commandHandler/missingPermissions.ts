@@ -7,7 +7,6 @@ export interface MISSING {
 
 const MISSING: MISSING = {
 	notOwner: 'this command is reserved for the server owner!',
-	notMaster: "you're missing the Giveawy Master role or the `Manage Guild` permission to run that command.",
 };
 
 export default class MissingPermissionsListener extends Listener {
@@ -20,6 +19,8 @@ export default class MissingPermissionsListener extends Listener {
 	}
 
 	public async exec(msg: Message, _: Command, type: any, missing: any): Promise<Message | Message[] | void> {
+		if (Array.isArray(missing)) missing = missing[0];
+
 		if (Object.keys(missing).includes(missing)) return msg.util!.reply(MISSING[missing]);
 
 		let text;

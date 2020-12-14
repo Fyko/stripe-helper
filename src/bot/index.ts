@@ -1,3 +1,3 @@
-import Client from './client/Client';
+import Client from './client/StripeClient';
 
 export default Client;

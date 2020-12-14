@@ -15,21 +15,6 @@ export default class EvalCommand extends Command {
 				content: 'Evaluate JavaScript code.',
 			},
 			ownerOnly: true,
-			flags: [
-				'--t',
-				'--input',
-				'--in',
-				'--i',
-				'--noout',
-				'--nout',
-				'--no',
-				'--notype',
-				'--notp',
-				'--notime',
-				'--noti',
-				'--haste',
-				'--h',
-			],
 			args: [
 				{
 					id: 'code',
@@ -112,12 +97,16 @@ export default class EvalCommand extends Command {
 		}
 
 		let evaled;
+		let apromise = false;
 		try {
 			const hrStart = process.hrtime();
 			evaled = eval(code); // eslint-disable-line no-eval
 
 			// eslint-disable-next-line
-			if (evaled != null && typeof evaled.then === 'function') evaled = await evaled;
+			if (evaled != null && typeof evaled.then === 'function') {
+				apromise = true;
+				evaled = await evaled;
+			}
 			const hrStop = process.hrtime(hrStart);
 
 			let response = '';
@@ -128,7 +117,7 @@ export default class EvalCommand extends Command {
 				response += MESSAGES.COMMANDS.EVAL.OUTPUT(this._clean(util.inspect(evaled, { depth: 0 })));
 			}
 			if (!notype && !noout) {
-				response += `• Type: \`${typeof evaled}\``;
+				response += `• Type: \`${apromise ? `Promise<${typeof evaled}>` : typeof evaled}\``;
 			}
 			if (!noout && !notime) {
 				response += ` • time taken: \`${(hrStop[0] * 1e9 + hrStop[1]) / 1e6}ms\``;

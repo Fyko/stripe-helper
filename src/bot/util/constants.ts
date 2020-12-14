@@ -1,3 +1,9 @@
+import { Intents } from 'discord.js';
+
+export const STRIPE_DASHBOARD = 'https://dashboard.stripe.com';
+
+export const intents = [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES];
+
 export const SENSITIVE_PATTERN_REPLACEMENT = '[REDACTED]';
 
 export const MESSAGES = {
