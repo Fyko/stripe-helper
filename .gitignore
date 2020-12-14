@@ -57,6 +57,9 @@ typings/
 # next.js build output
 .next
 
+# env
+.env
+
 # typescript build directory
 build/
 dist/
